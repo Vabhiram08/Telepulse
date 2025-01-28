@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Churn Prediction</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('https://via.placeholder.com/1920x1080.png?text=CRM+Background') no-repeat center center fixed;
+            background-size: cover; /* Ensures the image covers the entire screen */
+            color: #333333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8); /* Light tone overlay */
+            z-index: -1;
+        }
+
+        .container {
+            background-color: #23272a; /* Dark container for contrast */
+            padding: 30px 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #7289da;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            margin: 10px 0 5px;
+            color: #99aab5;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            background-color: #2f3136;
+            color: #ffffff;
+            border: 1px solid #7289da;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #99aab5;
+            box-shadow: 0 0 5px rgba(114, 137, 218, 0.7);
+        }
+
+        button {
+            background-color: #7289da;
+            color: #ffffff;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #5b6eae;
+        }
+
+        p#result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #f04747;
+        }
+
+        .success {
+            color: #43b581;
+        }
+    </style>
+    <script>
+        async function submitForm(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const jsonData = {};
+            formData.forEach((value, key) => (jsonData[key] = value));
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(jsonData),
+            });
+
+            const result = await response.json();
+            const resultElement = document.getElementById('result');
+
+            if (result.error) {
+                resultElement.innerText = `Error: ${result.error}`;
+                resultElement.className = 'error';
+            } else {
+                resultElement.innerText = 
+                    `Prediction: ${result.prediction} 
+                    (Churn Probability: ${result.probability}%)`;
+                resultElement.className = 'success';
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="container">
+        <h1>Telco Customer Churn Prediction</h1>
+        <form onsubmit="submitForm(event)">
+            <label for="MonthlyCharges">Monthly Charges:</label>
+            <input type="text" id="MonthlyCharges" name="MonthlyCharges" placeholder="e.g., 70.35" required>
+
+            <label for="tenure">Tenure (in months):</label>
+            <input type="text" id="tenure" name="tenure" placeholder="e.g., 12" required>
+
+            <label for="TotalCharges">Total Charges:</label>
+            <input type="text" id="TotalCharges" name="TotalCharges" placeholder="e.g., 850.5" required>
+
+            <button type="submit">Predict</button>
+        </form>
+        <p id="result"></p>
+    </div>
+</body>
+</html>
